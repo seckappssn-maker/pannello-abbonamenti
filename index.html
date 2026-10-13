@@ -117,7 +117,7 @@ const CFG={
     empty:'Ancora nessuna daara o scuola.<br>Quando una daara o una scuola crea il suo account nell\'app Daara & École, compare qui da sola.',notFound:'Nessuna daara o scuola trovata.'},
   loyer:{label:'Kër Loyer',noun:'Proprietario',nouns:'Proprietari iscritti',none:'Proprietario senza nome',
     empty:'Ancora nessun proprietario.<br>Quando un proprietario crea il suo account nell\'app Kër Loyer, compare qui da solo.',notFound:'Nessun proprietario trovato.'}};
-const NEWAPPS=['navette','daara','loyer'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
+const NEWAPPS=['boutique','resto','navette','daara','loyer'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
 const FORMULE={essentiel:{nom:'Essentiel',prix:5000},pro:{nom:'Pro',prix:10000},premium:{nom:'Premium',prix:15000}};
 let APP='boutique';try{const a=localStorage.getItem(AKEY);if(CFG[a])APP=a;}catch(e){}
 const C_=()=>CFG[APP];
@@ -170,9 +170,7 @@ const cli=id=>ROWS.find(x=>x.user_id===id);
 // ===== Supabase =====
 async function boot(){const t0=Date.now();while(!window.supabase&&Date.now()-t0<8000)await new Promise(r=>setTimeout(r,150));
   if(!window.supabase){VIEW='noLib';return render();}
-  SB=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'pannelloSeck.auth'}});
-  try{const {data}=await SB.auth.getSession();USER=data&&data.session?data.session.user:null;}catch(e){USER=null;}
-  if(!USER){VIEW='login';return render();}
+  // Tutte le app stanno ora nel progetto seck.apps.sn: si entra solo con la password TN-
   await loadAll();}
 async function loadAll(){VIEW='loading';render();
   if(isN())return loadNav();
@@ -190,7 +188,7 @@ async function loadNav(){
   if(!NAVPW){VIEW='navPw';return render();}
   const r=await navRpc(APP+'_pan_list');
   if(r.error){if(/password|sbagliata/i.test(r.error.message)){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(e){}window._navMsg='Password sbagliata, riprova.';VIEW='navPw';return render();}
-    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.':errMsg(r.error);VIEW='netErr';return render();}
+    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?(APP==='resto'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-resto.sql → Run.':APP==='boutique'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla carnet-boutique.sql → Run.':'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.'):errMsg(r.error);VIEW='netErr';return render();}
   ROWS=r.data||[];
   const p=await navRpc(APP+'_pan_pays');PAYS=p.error?[]:(p.data||[]);
   VIEW='main';render();if(openId&&cli(openId))openClient(openId);}
@@ -202,7 +200,7 @@ function render(){const app=$('app');
   if(VIEW==='login')return vLogin();
   if(VIEW==='notAdmin'){app.innerHTML='<div class="wrap" style="padding-top:40px"><div class="brand">Quasi fatto ✅</div><div class="card stack" style="margin-top:14px"><span>Sei entrato come <b>'+esc(USER&&USER.email)+'</b>.</span><span>Ora fai il passo su Supabase: incolla il testo SQL e premi <b>Run</b>. Poi torna qui e premi « Riprova ».</span><button class="btn" data-act="reload">Riprova</button><button class="btn line" data-act="logout">Esci</button></div></div>';return;}
   if(VIEW==='noResto'){app.innerHTML='<div class="wrap" style="padding-top:30px">'+appSwitch()+'<div class="card stack" style="margin-top:14px"><b>Ristoranti non ancora attivati</b><span>Fai il passo su Supabase: SQL Editor → incolla il testo <b>resto.sql</b> → Run. Poi torna qui e premi « Riprova ».</span><button class="btn" data-act="reload">Riprova</button></div></div>';return;}
-  if(VIEW==='navPw'){app.innerHTML='<div class="wrap" style="padding-top:30px">'+appSwitch()+'<form id="fNav" class="card stack" style="margin-top:14px"><b>'+C_().label+'</b><span class="small">Scrivi la password del pannello (quella che inizia con TN-: vale per Navettes, Daaras e Loyers). Resta salvata su questo telefono.</span><label class="f">Password<input id="navPw" type="password" autocomplete="off" autocapitalize="characters"></label><button class="btn" type="submit">Entra</button><div class="small" style="color:var(--bad)">'+esc(window._navMsg||'')+'</div></form></div>';window._navMsg='';return;}
+  if(VIEW==='navPw'){app.innerHTML='<div class="wrap" style="padding-top:30px">'+appSwitch()+'<form id="fNav" class="card stack" style="margin-top:14px"><b>'+C_().label+'</b><span class="small">Scrivi la password del pannello (quella che inizia con TN-: vale per tutte le app). Resta salvata su questo telefono.</span><label class="f">Password<input id="navPw" type="password" autocomplete="off" autocapitalize="characters"></label><button class="btn" type="submit">Entra</button><div class="small" style="color:var(--bad)">'+esc(window._navMsg||'')+'</div></form></div>';window._navMsg='';return;}
   if(VIEW==='netErr'){app.innerHTML='<div class="wrap" style="padding-top:40px">'+appSwitch()+'<div class="empty" style="margin-top:14px">'+esc(window._lastErr||'Errore')+'</div><div style="margin-top:12px"><button class="btn" data-act="reload">Riprova</button></div></div>';return;}
   vMain();}
 
@@ -246,7 +244,7 @@ function vMain(){const t=todayISO(),mese=t.slice(0,7);
   '<label class="f">Numero Wave / OM<input id="myNum" inputmode="tel" value="'+esc(TUO_WAVE)+'"></label><label class="f">Numero WhatsApp<input id="myWa" inputmode="tel" value="'+esc(MY_WA)+'"></label>'+
   '<button class="btn" data-act="saveNum">Salva</button><button class="btn line" data-act="cfgCopy">Copia il testo per GitHub (config.json)</button>'+
   '<div class="small">Per cambiarlo anche nell\'app dei commercianti: su GitHub apri <b>config.json</b> → matita ✏️ → cancella tutto → incolla → Commit changes.</div></div>'+
-  '<h3>Come funziona</h3><div class="card small stack"><span>1. Il '+chi()+' crea il suo account nell\'app: ha '+(isN()?7:14)+' giorni gratis'+(isF()?' (formula Premium)':'')+' e compare qui da solo.</span>'+(isF()?'<span>Quando paga, scegli la formula: Essentiel 5 000 F, Pro 10 000 F, Premium 15 000 F al mese. L\'app mostra solo le funzioni della formula.</span>':'')+'<span>2. Ti paga su Wave/Orange Money. Tu apri la sua boutique qui e premi « Registra pagamento ».</span><span>3. La sua app si sblocca da sola. Gli mandi il messaggio di conferma su WhatsApp.</span><span>4. Se non paga: 3 giorni dopo la scadenza l\'app si blocca da sola'+(isN()?' e la sua pagina pubblica si chiude. Può solo guardare i dati, che restano salvati':'. Può solo guardare i dati')+', finché non paga.</span><span>Tutto è salvato online: puoi cambiare telefono o cancellare la cronologia senza perdere niente.</span>'+(isN()?'<button class="btn sm line" data-act="navForget">Dimentica la password TN- su questo telefono</button>':'')+'</div></div>';
+  '<h3>Come funziona</h3><div class="card small stack"><span>1. Il '+chi()+' crea il suo account nell\'app: ha '+(isN()?7:14)+' giorni gratis'+(isF()?' (formula Premium)':'')+' e compare qui da solo.</span>'+(isF()?'<span>Quando paga, scegli la formula: Essentiel 5 000 F, Pro 10 000 F, Premium 15 000 F al mese. L\'app mostra solo le funzioni della formula.</span>':'')+'<span>2. Ti paga su Wave/Orange Money. Tu apri la sua boutique qui e premi « Registra pagamento ».</span><span>3. La sua app si sblocca da sola. Gli mandi il messaggio di conferma su WhatsApp.</span><span>4. Se non paga: 3 giorni dopo la scadenza l\'app si blocca da sola'+(isN()?' e la sua pagina pubblica si chiude. Può solo guardare i dati, che restano salvati':'. Può solo guardare i dati')+', finché non paga.</span><span>Tutto è salvato online: puoi cambiare telefono o cancellare la cronologia senza perdere niente.</span>'+'</div></div>';
   renderList();}
 
 function renderList(){const el=$('list');if(!el)return;
@@ -272,7 +270,7 @@ function openClient(id){const c=cli(id);if(!c)return;const s=status(c);openId=id
   const pays=PAYS.filter(p=>p.user_id===id);
   const tot=pays.reduce((a,p)=>a+(p.amount||0),0);
   const newExp=addMonths(baseDate(c),payDraft.months);
-  const who=c.owner?' '+c.owner:'';const L=C_().label;const prM=isNav()?(c.price||FORMULE[c.formule].prix):isR()&&FORMULE[c.formule]?FORMULE[c.formule].prix:(c.price||PREZZO_BASE);
+  const who=c.owner?' '+c.owner:'';const L=C_().label;const prM=(isNav()||isR())?(c.price||(FORMULE[c.formule]||FORMULE.premium).prix):isR()&&FORMULE[c.formule]?FORMULE[c.formule].prix:(c.price||PREZZO_BASE);
   const remind=s.k==='bloccati'||s.k==='ritardo'
     ?'Bonjour'+who+', votre abonnement '+L+' ('+nome(c)+') a expiré le '+fdate(s.end)+'. '+(s.k==='bloccati'?'L\'application est maintenant bloquée.':'Elle sera bloquée dans '+(GRACE_DAYS+s.left)+' jour(s).')+' Envoyez '+F(prM)+' par Wave ou Orange Money au '+TUO_WAVE+' et elle se débloque. Merci !'
     :s.trial?'Bonjour'+who+', votre essai gratuit '+L+' se termine le '+fdate(s.end)+'. L\'abonnement coûte '+(isF()?'5 000 F (Essentiel), 10 000 F (Pro) ou 15 000 F (Premium)':F(c.price))+' par mois, par Wave ou Orange Money au '+TUO_WAVE+'. Merci !'
@@ -318,9 +316,9 @@ document.addEventListener('click',async e=>{
   if(a==='close')return closeSheet();
   if(a==='authMode'){AUTH=el.dataset.m;return vLogin();}
   if(a==='reload')return loadAll();
-  if(a==='askOut'){$('outZone').innerHTML='<div class="notice stack" style="margin-bottom:10px"><span>Uscire? Per rientrare servono email e password.</span><div class="grid2"><button class="btn danger" data-act="logout">Sì, esci</button><button class="btn line" data-act="noOut">No</button></div></div>';return;}
+  if(a==='askOut'){$('outZone').innerHTML='<div class="notice stack" style="margin-bottom:10px"><span>Uscire? Per rientrare serve la password TN-.</span><div class="grid2"><button class="btn danger" data-act="logout">Sì, esci</button><button class="btn line" data-act="noOut">No</button></div></div>';return;}
   if(a==='noOut'){$('outZone').innerHTML='';return;}
-  if(a==='logout'){try{await SB.auth.signOut();}catch(err){}USER=null;ROWS=[];PAYS=[];closeSheet();VIEW='login';AUTH='login';return render();}
+  if(a==='logout'){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(err){}ROWS=[];PAYS=[];closeSheet();VIEW='navPw';return render();}
   if(a==='open')return openClient(el.dataset.id);
   if(a==='edit')return formClient(cli(el.dataset.id));
   if(a==='mon'){readPay();const c=cli(payDraft.id);payDraft.months=+el.dataset.m;payDraft.amount=String((isF()?FORMULE[payDraft.formule].prix:(c.price||0))*payDraft.months);openClient(c.user_id);return;}
