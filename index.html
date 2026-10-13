@@ -1,0 +1,350 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Abbonamenti Seck Tech</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: registro abbonamenti — riepilogo in alto, filtri, schede clienti, dettaglio a foglio dal basso */
+:root{
+  --bg:#F3F2F7; --card:#FFFFFF; --ink:#1B1830; --muted:#6A6680; --line:#DEDCE8;
+  --accent:#4B3B8F; --accent-soft:#E6E2F4; --ok:#2E7D4F; --ok-soft:#DFF0E5;
+  --warn:#AD6B12; --warn-soft:#F6E9D3; --bad:#B4382F; --bad-soft:#F7E1DE;
+  --display:'Bricolage Grotesque',ui-rounded,system-ui,sans-serif;
+  --body:'Figtree',system-ui,-apple-system,'Segoe UI',sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#121019; --card:#1C1926; --ink:#ECEAF4; --muted:#A39FB8; --line:#2F2B3E;
+  --accent:#A797F0; --accent-soft:#2A2445; --ok:#62C08A; --ok-soft:#173024;
+  --warn:#E5A752; --warn-soft:#352816; --bad:#EE7B70; --bad-soft:#3A1F1C; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121019; --card:#1C1926; --ink:#ECEAF4; --muted:#A39FB8; --line:#2F2B3E;
+  --accent:#A797F0; --accent-soft:#2A2445; --ok:#62C08A; --ok-soft:#173024;
+  --warn:#E5A752; --warn-soft:#352816; --bad:#EE7B70; --bad-soft:#3A1F1C; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.4;font-variant-numeric:tabular-nums}
+button,input,select,textarea{font:inherit;color:inherit}
+.wrap{max-width:600px;margin:0 auto;padding-inline:16px;padding-block:0 40px}
+header.top{padding-block:18px 6px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.brand{font-family:var(--display);font-weight:800;font-size:24px;letter-spacing:-.01em}
+.brand small{display:block;font-family:var(--body);font-weight:500;font-size:13px;color:var(--muted);letter-spacing:0}
+h2{font-family:var(--display);font-weight:800;font-size:21px;margin:0}
+h3{font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);margin:22px 0 8px;font-weight:700}
+.stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px}
+.stat .k{font-size:13px;color:var(--muted)}
+.stat .v{font-family:var(--display);font-weight:800;font-size:23px;margin-top:2px}
+.stat.main{grid-column:1/-1;background:var(--accent);border-color:var(--accent);color:var(--card)}
+.stat.main .k{color:inherit;opacity:.8}
+.stat.main .v{font-size:30px}
+.filters{display:flex;gap:6px;overflow-x:auto;padding-bottom:2px}
+.fbtn{border:1px solid var(--line);background:var(--card);border-radius:99px;padding:7px 13px;font-size:14px;font-weight:600;white-space:nowrap;cursor:pointer}
+.fbtn[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.list{display:flex;flex-direction:column;gap:8px}
+.cli{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;width:100%;text-align:left;cursor:pointer;position:relative;overflow:hidden}
+.cli::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--stripe,transparent)}
+.cli .main{flex:1;min-width:0}
+.cli .t{font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.cli .s{font-size:13px;color:var(--muted)}
+.chip{display:inline-block;padding:3px 9px;border-radius:99px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.c-ok{background:var(--ok-soft);color:var(--ok)} .c-warn{background:var(--warn-soft);color:var(--warn)} .c-bad{background:var(--bad-soft);color:var(--bad)} .c-new{background:var(--accent-soft);color:var(--accent)}
+.right{text-align:right;flex:none}
+.right .d{font-size:13px;color:var(--muted);margin-top:4px}
+.mono{font-family:var(--display);font-weight:800;letter-spacing:.12em}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px}
+.stack{display:flex;flex-direction:column;gap:10px}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label.f{display:flex;flex-direction:column;gap:4px;font-size:13px;color:var(--muted);font-weight:600;min-width:0}
+input,select,textarea{background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:11px 12px;font-size:16px;width:100%;min-width:0}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.btn{border:0;border-radius:12px;padding:13px 16px;font-weight:700;font-size:16px;cursor:pointer;background:var(--accent);color:var(--card);width:100%;text-align:center;text-decoration:none;display:block}
+.btn.ghost{background:var(--accent-soft);color:var(--accent)}
+.btn.line{background:none;border:1px solid var(--line);color:var(--ink)}
+.btn.ok{background:var(--ok);color:var(--card)}
+.btn.danger{background:var(--bad-soft);color:var(--bad)}
+.btn.sm{padding:8px 12px;font-size:14px;width:auto;display:inline-block}
+.months{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}
+.mbtn{border:1px solid var(--line);background:var(--card);border-radius:10px;padding:10px 4px;font-weight:700;cursor:pointer}
+.mbtn[aria-pressed="true"]{background:var(--accent);border-color:var(--accent);color:var(--card)}
+.codebox{font-family:var(--display);font-weight:800;font-size:30px;letter-spacing:.1em;text-align:center;padding:12px;border-radius:12px;background:var(--ok-soft);color:var(--ok)}
+.hist{display:flex;justify-content:space-between;gap:10px;padding:10px 0;border-top:1px solid var(--line);font-size:14.5px}
+.hist:first-child{border-top:0}
+.small{font-size:13px;color:var(--muted)}
+.empty{padding:24px 14px;color:var(--muted);text-align:center;background:var(--card);border:1px dashed var(--line);border-radius:14px}
+.sheet-bg{position:fixed;inset:0;background:rgba(15,12,30,.5);z-index:20;display:flex;align-items:flex-end;justify-content:center}
+.sheet{background:var(--bg);width:100%;max-width:600px;max-height:92%;overflow:auto;border-radius:18px 18px 0 0;padding-inline:16px;padding-block:16px calc(20px + env(safe-area-inset-bottom,0px))}
+.sheet-head{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:12px}
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;z-index:40;max-width:90%}
+.notice{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:12px 14px;font-size:14px}
+@media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+</style>
+
+<style>
+.search{margin-top:10px}
+.top-actions{display:flex;gap:6px}
+.loading{padding:30px 14px;text-align:center;color:var(--muted)}
+.appsw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
+.appsw .fbtn:nth-child(4),.appsw .fbtn:nth-child(5){grid-column:span 1}
+@media (min-width:520px){.appsw{grid-template-columns:repeat(5,minmax(0,1fr))}}
+.appsw .fbtn{text-align:center;padding:10px 4px;font-size:14.5px}
+</style>
+<div id="app"><div class="loading">Caricamento…</div></div>
+<div id="sheetRoot"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" onerror="var s=document.createElement('script');s.src='https://unpkg.com/@supabase/supabase-js@2';document.head.appendChild(s)"></script>
+<script>
+// ===== Impostazioni =====
+const SUPA_URL='https://cmwsypqsehhuzkgylhrx.supabase.co';
+const SUPA_KEY='sb_publishable_MUQvVLiAC3D4YEZQdFZEIg_7qFhb_9g';
+const ADMIN_EMAIL='seck93723@gmail.com';
+const GRACE_DAYS=3;                // uguale all'app dei commercianti
+const PREZZO_BASE=5000;            // FCFA al mese, si può cambiare per ogni cliente
+const TUO_NOME='Seck Tech';
+// Teranga Navette sta nel progetto Supabase nuovo "seck.apps.sn" (si entra con la password del pannello navette)
+const NAV_URL='https://ncsjgmkrsvtwklfrdbgy.supabase.co';
+const NAV_KEY='sb_publishable_oDE4BbU6J3RTnce1Oo91cQ_hokWgh0U';
+const NPKEY='pannelloSeck.navPass';
+let NAVPW='';try{NAVPW=localStorage.getItem(NPKEY)||'';}catch(e){}
+let SBN=null;
+const NKEY='pannelloSeck.numeri';
+const AKEY='pannelloSeck.app';
+const CFG={
+  boutique:{list:'admin_boutiques',pays:'paiements',pay:'enregistrer_paiement',undo:'annuler_paiement',label:'Carnet Boutique',noun:'Boutique',nouns:'Boutique iscritte',none:'Boutique senza nome',
+    empty:'Ancora nessuna boutique.<br>Quando un commerciante crea il suo account nell\'app Carnet Boutique, compare qui da solo.',notFound:'Nessuna boutique trovata.'},
+  resto:{list:'admin_restos',pays:'resto_paiements',pay:'resto_enregistrer_paiement',undo:'resto_annuler_paiement',label:'Teranga Resto',noun:'Ristorante',nouns:'Ristoranti iscritti',none:'Ristorante senza nome',
+    empty:'Ancora nessun ristorante.<br>Quando un ristorante crea il suo account nell\'app Teranga Resto, compare qui da solo.',notFound:'Nessun ristorante trovato.'},
+  navette:{label:'Teranga Navette',noun:'Trasportatore',nouns:'Trasportatori iscritti',none:'Trasportatore senza nome',
+    empty:'Ancora nessun trasportatore.<br>Quando un trasportatore crea il suo account nell\'app Teranga Navette, compare qui da solo.',notFound:'Nessun trasportatore trovato.'},
+  daara:{label:'Daara & École',noun:'Daara / scuola',nouns:'Daara e scuole iscritte',none:'Daara senza nome',
+    empty:'Ancora nessuna daara o scuola.<br>Quando una daara o una scuola crea il suo account nell\'app Daara & École, compare qui da sola.',notFound:'Nessuna daara o scuola trovata.'},
+  loyer:{label:'Kër Loyer',noun:'Proprietario',nouns:'Proprietari iscritti',none:'Proprietario senza nome',
+    empty:'Ancora nessun proprietario.<br>Quando un proprietario crea il suo account nell\'app Kër Loyer, compare qui da solo.',notFound:'Nessun proprietario trovato.'}};
+const NEWAPPS=['navette','daara','loyer'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
+const FORMULE={essentiel:{nom:'Essentiel',prix:5000},pro:{nom:'Pro',prix:10000},premium:{nom:'Premium',prix:15000}};
+let APP='boutique';try{const a=localStorage.getItem(AKEY);if(CFG[a])APP=a;}catch(e){}
+const C_=()=>CFG[APP];
+const isR=()=>APP==='resto';
+const isN=()=>NEWAPPS.includes(APP);      // app del progetto nuovo seck.apps.sn
+const isNav=()=>APP==='navette';
+const isF=()=>APP==='resto'||APP==='navette';   // app con formule Essentiel/Pro/Premium
+const chi=()=>APP==='navette'?'trasportatore':APP==='daara'?'responsabile della daara/scuola':APP==='loyer'?'proprietario':isR()?'ristorante':'commerciante';
+const fNom=c=>isF()&&FORMULE[c.formule]?FORMULE[c.formule].nom:'';
+let TUO_WAVE='77 879 00 06', MY_WA='77 879 00 06';
+try{const n=JSON.parse(localStorage.getItem(NKEY)||'null');if(n){TUO_WAVE=n.wave||TUO_WAVE;MY_WA=n.wa||TUO_WAVE;}}catch(e){}
+
+// ===== Date =====
+const pad=n=>String(n).padStart(2,'0');
+function todayISO(){const d=new Date();return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function addDays(iso,n){const [y,m,d]=iso.split('-').map(Number);const t=new Date(y,m-1,d+n);return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());}
+function addMonths(iso,n){const [y,m,d]=iso.split('-').map(Number);const last=new Date(y,m-1+n+1,0).getDate();const t=new Date(y,m-1+n,Math.min(d,last));return t.getFullYear()+'-'+pad(t.getMonth()+1)+'-'+pad(t.getDate());}
+function diffDays(a,b){const p=s=>{const [y,m,d]=s.split('-').map(Number);return Date.UTC(y,m-1,d)};return Math.round((p(b)-p(a))/86400000);}
+function fdate(iso){if(!iso)return '—';const [y,m,d]=iso.slice(0,10).split('-');return d+'/'+m+'/'+y;}
+const maxIso=(...a)=>a.filter(Boolean).sort().pop()||'';
+
+// ===== Utili =====
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const F=n=>Math.round(n||0).toLocaleString('fr-FR').replace(/ | /g,' ')+' F';
+const num=v=>{const n=parseFloat(String(v).replace(/\s/g,'').replace(',','.'));return isNaN(n)?0:n;};
+function waNum(p){let d=String(p||'').replace(/\D/g,'');if(d.startsWith('00'))d=d.slice(2);if(d.length===9&&d[0]==='7')d='221'+d;return d;}
+const waLink=(p,t)=>'https://wa.me/'+waNum(p)+'?text='+encodeURIComponent(t);
+const fphone=p=>{const d=waNum(p);const m=d.match(/^221(\d\d)(\d{3})(\d\d)(\d\d)$/);return m?m.slice(1).join(' '):(p||'');};
+const $=id=>document.getElementById(id);
+let toastT=null;
+function toast(m){clearTimeout(toastT);let t=document.querySelector('.toast');if(!t){t=document.createElement('div');t.className='toast';document.body.appendChild(t);}t.textContent=m;toastT=setTimeout(()=>t.remove(),2800);}
+function copyText(txt){try{navigator.clipboard.writeText(txt).then(()=>toast('Copiato'),()=>fb(txt));}catch(e){fb(txt);}}
+function fb(txt){const ta=document.createElement('textarea');ta.value=txt;document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('Copiato');}catch(e){toast('Seleziona e copia a mano');}ta.remove();}
+function errMsg(e){const m=String(e&&e.message||e||'');return /fetch|network|Failed/i.test(m)?'Niente internet: riprova':m;}
+
+// ===== Stato =====
+let SB=null,USER=null,AUTH='login',VIEW='loading',ROWS=[],PAYS=[],filter='tutti',q='',payDraft=null,openId=null;
+
+function status(c){const t=todayISO();const end=maxIso(c.trial_end,c.paid_until);const left=diffDays(t,end);const trial=!c.paid_until||c.trial_end>=c.paid_until;
+  const o={left,end,trial};
+  if(left<-GRACE_DAYS)return{...o,k:'bloccati',label:'Bloccato',cls:'c-bad',stripe:'var(--bad)'};
+  if(left<0)return{...o,k:'ritardo',label:'In ritardo',cls:'c-bad',stripe:'var(--bad)'};
+  if(trial)return{...o,k:'prova',label:'Prova · '+left+' g',cls:left<=5?'c-warn':'c-new',stripe:left<=5?'var(--warn)':'var(--accent)'};
+  if(left<=5)return{...o,k:'scadono',label:'Scade tra '+left+' g',cls:'c-warn',stripe:'var(--warn)'};
+  return{...o,k:'attivi',label:'Attivo',cls:'c-ok',stripe:'var(--ok)'};}
+const daSoll=s=>s.k==='scadono'||s.k==='ritardo'||s.k==='bloccati'||(s.k==='prova'&&s.left<=5);
+const nome=c=>c.shop_name||C_().none;
+const cli=id=>ROWS.find(x=>x.user_id===id);
+
+// ===== Supabase =====
+async function boot(){const t0=Date.now();while(!window.supabase&&Date.now()-t0<8000)await new Promise(r=>setTimeout(r,150));
+  if(!window.supabase){VIEW='noLib';return render();}
+  SB=window.supabase.createClient(SUPA_URL,SUPA_KEY,{auth:{persistSession:true,autoRefreshToken:true,storageKey:'pannelloSeck.auth'}});
+  try{const {data}=await SB.auth.getSession();USER=data&&data.session?data.session.user:null;}catch(e){USER=null;}
+  if(!USER){VIEW='login';return render();}
+  await loadAll();}
+async function loadAll(){VIEW='loading';render();
+  if(isN())return loadNav();
+  const r=await SB.rpc(C_().list);
+  if(r.error){VIEW=/autorizzato|does not exist|Could not find|schema cache/i.test(r.error.message)?(isR()&&/Could not find|does not exist|schema cache/i.test(r.error.message)?'noResto':'notAdmin'):'netErr';window._lastErr=errMsg(r.error);return render();}
+  ROWS=r.data||[];
+  const p=await SB.from(C_().pays).select('*').order('created_at',{ascending:false});
+  PAYS=p.error?[]:(p.data||[]);
+  VIEW='main';render();if(openId&&cli(openId))openClient(openId);}
+
+// ===== Teranga Navette (progetto seck.apps.sn) =====
+function navSB(){if(!SBN)SBN=window.supabase.createClient(NAV_URL,NAV_KEY,{auth:{persistSession:false,autoRefreshToken:false,storageKey:'pannelloSeck.nav'}});return SBN;}
+async function navRpc(fn,args){return navSB().rpc(fn,{p_pass:NAVPW,...(args||{})});}
+async function loadNav(){
+  if(!NAVPW){VIEW='navPw';return render();}
+  const r=await navRpc(APP+'_pan_list');
+  if(r.error){if(/password|sbagliata/i.test(r.error.message)){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(e){}window._navMsg='Password sbagliata, riprova.';VIEW='navPw';return render();}
+    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.':errMsg(r.error);VIEW='netErr';return render();}
+  ROWS=r.data||[];
+  const p=await navRpc(APP+'_pan_pays');PAYS=p.error?[]:(p.data||[]);
+  VIEW='main';render();if(openId&&cli(openId))openClient(openId);}
+
+// ===== Schermate =====
+function render(){const app=$('app');
+  if(VIEW==='loading'){app.innerHTML='<div class="loading">Caricamento…</div>';return;}
+  if(VIEW==='noLib'){app.innerHTML='<div class="wrap"><div class="empty" style="margin-top:40px">Non riesco a collegarmi. Controlla internet e ricarica la pagina.</div></div>';return;}
+  if(VIEW==='login')return vLogin();
+  if(VIEW==='notAdmin'){app.innerHTML='<div class="wrap" style="padding-top:40px"><div class="brand">Quasi fatto ✅</div><div class="card stack" style="margin-top:14px"><span>Sei entrato come <b>'+esc(USER&&USER.email)+'</b>.</span><span>Ora fai il passo su Supabase: incolla il testo SQL e premi <b>Run</b>. Poi torna qui e premi « Riprova ».</span><button class="btn" data-act="reload">Riprova</button><button class="btn line" data-act="logout">Esci</button></div></div>';return;}
+  if(VIEW==='noResto'){app.innerHTML='<div class="wrap" style="padding-top:30px">'+appSwitch()+'<div class="card stack" style="margin-top:14px"><b>Ristoranti non ancora attivati</b><span>Fai il passo su Supabase: SQL Editor → incolla il testo <b>resto.sql</b> → Run. Poi torna qui e premi « Riprova ».</span><button class="btn" data-act="reload">Riprova</button></div></div>';return;}
+  if(VIEW==='navPw'){app.innerHTML='<div class="wrap" style="padding-top:30px">'+appSwitch()+'<form id="fNav" class="card stack" style="margin-top:14px"><b>'+C_().label+'</b><span class="small">Scrivi la password del pannello (quella che inizia con TN-: vale per Navettes, Daaras e Loyers). Resta salvata su questo telefono.</span><label class="f">Password<input id="navPw" type="password" autocomplete="off" autocapitalize="characters"></label><button class="btn" type="submit">Entra</button><div class="small" style="color:var(--bad)">'+esc(window._navMsg||'')+'</div></form></div>';window._navMsg='';return;}
+  if(VIEW==='netErr'){app.innerHTML='<div class="wrap" style="padding-top:40px">'+appSwitch()+'<div class="empty" style="margin-top:14px">'+esc(window._lastErr||'Errore')+'</div><div style="margin-top:12px"><button class="btn" data-act="reload">Riprova</button></div></div>';return;}
+  vMain();}
+
+function vLogin(){const su=AUTH==='signup';
+  $('app').innerHTML='<div class="wrap" style="min-height:90vh;display:flex;flex-direction:column;justify-content:center"><div class="brand" style="text-align:center">🔒 Abbonamenti<small>Carnet Boutique · '+TUO_NOME+'</small></div>'+
+  '<form id="fAuth" class="card stack" style="margin-top:16px"><div class="filters"><button class="fbtn" type="button" data-act="authMode" data-m="login" aria-pressed="'+!su+'">Entra</button><button class="fbtn" type="button" data-act="authMode" data-m="signup" aria-pressed="'+su+'">Prima volta: crea account</button></div>'+
+  '<label class="f">Email<input id="auMail" type="email" autocomplete="username" value="'+ADMIN_EMAIL+'"></label>'+
+  '<label class="f">Password<input id="auPass" type="password" autocomplete="'+(su?'new-password':'current-password')+'"></label>'+
+  (su?'<label class="f">Ripeti la password<input id="auPass2" type="password" autocomplete="new-password"></label>':'')+
+  '<button class="btn" type="submit" id="auBtn">'+(su?'Crea il mio account':'Entra')+'</button><div class="small" id="auMsg"></div></form></div>';}
+
+async function doAuth(){const mail=$('auMail').value.trim().toLowerCase(),pw=$('auPass').value,su=AUTH==='signup';const say=t=>{$('auMsg').textContent=t;};
+  if(!mail.includes('@'))return say('Email non valida');if(pw.length<6)return say('La password deve avere almeno 6 caratteri');
+  if(su&&pw!==$('auPass2').value)return say('Le due password non sono uguali');
+  const b=$('auBtn');b.disabled=true;b.textContent='Attendi…';say('');
+  try{const r=su?await SB.auth.signUp({email:mail,password:pw}):await SB.auth.signInWithPassword({email:mail,password:pw});
+    if(r.error)throw r.error;
+    if(!r.data.session){AUTH='login';vLogin();$('auMsg').textContent='Account creato. Apri la tua email, premi il link di conferma, poi torna qui e premi « Entra ».';return;}
+    USER=r.data.session.user;await loadAll();}
+  catch(e){const m=String(e&&e.message||'');b.disabled=false;b.textContent=su?'Crea il mio account':'Entra';
+    say(/already|registered|exists/i.test(m)?'Questo account esiste già: premi « Entra »':/invalid login|credentials/i.test(m)?'Email o password sbagliata':/not confirmed/i.test(m)?'Prima conferma l\'email (guarda nella tua casella di posta)':errMsg(e));}}
+
+function appSwitch(){return '<div class="appsw">'+[['boutique','🏪 Boutiques'],['resto','🍽️ Restos'],['navette','🚐 Navettes'],['daara','📖 Daaras'],['loyer','🏠 Loyers']].map(([k,l])=>'<button class="fbtn" data-act="app" data-a="'+k+'" aria-pressed="'+(APP===k)+'">'+l+'</button>').join('')+'</div>';}
+function vMain(){const t=todayISO(),mese=t.slice(0,7);
+  const st=ROWS.map(c=>({c,s:status(c)}));
+  const incMese=PAYS.filter(p=>String(p.paid_on).slice(0,7)===mese).reduce((s,p)=>s+(p.amount||0),0);
+  const attivi=st.filter(x=>x.s.k==='attivi'||x.s.k==='scadono');
+  const prova=st.filter(x=>x.s.k==='prova');
+  const previsto=attivi.reduce((s,x)=>s+(x.c.price||0),0);
+  const FL=[['tutti','Tutti',st.length],['sollecitare','Da sollecitare',st.filter(x=>daSoll(x.s)).length],['attivi','Attivi',attivi.length],['prova','In prova',prova.length],['bloccati','Bloccati',st.filter(x=>x.s.k==='bloccati').length]];
+  $('app').innerHTML='<div class="wrap"><header class="top"><div class="brand">Abbonamenti<small>'+C_().label+' · '+TUO_NOME+'</small></div><div class="top-actions"><button class="btn sm line" data-act="reload" aria-label="Aggiorna">↻</button><button class="btn sm line" data-act="askOut">Esci</button></div></header>'+
+  appSwitch()+'<div id="outZone"></div>'+
+  '<div class="stats"><div class="stat main"><div class="k">Incassato a '+new Date().toLocaleDateString('it-IT',{month:'long'})+'</div><div class="v">'+F(incMese)+'</div></div>'+
+  '<div class="stat"><div class="k">Clienti che pagano</div><div class="v">'+attivi.length+'</div></div>'+
+  '<div class="stat"><div class="k">In prova</div><div class="v">'+prova.length+'</div></div>'+
+  '<div class="stat" style="grid-column:1/-1"><div class="k">Entrate al mese (clienti attivi)</div><div class="v">'+F(previsto)+'</div></div></div>'+
+  '<h3>'+C_().nouns+'</h3><div class="filters">'+FL.map(([k,l,n])=>'<button class="fbtn" data-f="'+k+'" aria-pressed="'+(filter===k)+'">'+l+' · '+n+'</button>').join('')+'</div>'+
+  '<input class="search" id="q" type="search" placeholder="Cerca: nome, telefono o ID" value="'+esc(q)+'">'+
+  '<div class="list" id="list" style="margin-top:10px"></div>'+
+  '<h3>Il mio numero per i pagamenti</h3><div class="card stack"><div class="small">Va nei messaggi WhatsApp che mandi ai commercianti.</div>'+
+  '<label class="f">Numero Wave / OM<input id="myNum" inputmode="tel" value="'+esc(TUO_WAVE)+'"></label><label class="f">Numero WhatsApp<input id="myWa" inputmode="tel" value="'+esc(MY_WA)+'"></label>'+
+  '<button class="btn" data-act="saveNum">Salva</button><button class="btn line" data-act="cfgCopy">Copia il testo per GitHub (config.json)</button>'+
+  '<div class="small">Per cambiarlo anche nell\'app dei commercianti: su GitHub apri <b>config.json</b> → matita ✏️ → cancella tutto → incolla → Commit changes.</div></div>'+
+  '<h3>Come funziona</h3><div class="card small stack"><span>1. Il '+chi()+' crea il suo account nell\'app: ha '+(isN()?7:14)+' giorni gratis'+(isF()?' (formula Premium)':'')+' e compare qui da solo.</span>'+(isF()?'<span>Quando paga, scegli la formula: Essentiel 5 000 F, Pro 10 000 F, Premium 15 000 F al mese. L\'app mostra solo le funzioni della formula.</span>':'')+'<span>2. Ti paga su Wave/Orange Money. Tu apri la sua boutique qui e premi « Registra pagamento ».</span><span>3. La sua app si sblocca da sola. Gli mandi il messaggio di conferma su WhatsApp.</span><span>4. Se non paga: 3 giorni dopo la scadenza l\'app si blocca da sola'+(isN()?' e la sua pagina pubblica si chiude. Può solo guardare i dati, che restano salvati':'. Può solo guardare i dati')+', finché non paga.</span><span>Tutto è salvato online: puoi cambiare telefono o cancellare la cronologia senza perdere niente.</span>'+(isN()?'<button class="btn sm line" data-act="navForget">Dimentica la password TN- su questo telefono</button>':'')+'</div></div>';
+  renderList();}
+
+function renderList(){const el=$('list');if(!el)return;
+  let shown=ROWS.map(c=>({c,s:status(c)}));
+  if(filter==='sollecitare')shown=shown.filter(x=>daSoll(x.s));
+  else if(filter==='attivi')shown=shown.filter(x=>x.s.k==='attivi'||x.s.k==='scadono');
+  else if(filter==='prova')shown=shown.filter(x=>x.s.k==='prova');
+  else if(filter==='bloccati')shown=shown.filter(x=>x.s.k==='bloccati');
+  const qq=q.trim().toLowerCase(),qd=qq.replace(/\D/g,'');
+  if(qq)shown=shown.filter(x=>nome(x.c).toLowerCase().includes(qq)||(x.c.owner||'').toLowerCase().includes(qq)||(x.c.shop_id||'').toLowerCase().includes(qq)||(qd.length>=3&&String(x.c.phone||'').includes(qd)));
+  const order={bloccati:0,ritardo:1,scadono:2,prova:3,attivi:4};
+  shown.sort((a,b)=>order[a.s.k]-order[b.s.k]||a.s.end.localeCompare(b.s.end));
+  el.innerHTML=shown.length?shown.map(x=>'<button class="cli" style="--stripe:'+x.s.stripe+'" data-act="open" data-id="'+x.c.user_id+'"><div class="main"><div class="t">'+esc(nome(x.c))+'</div><div class="s">'+esc(fphone(x.c.phone))+(x.c.owner?' · '+esc(x.c.owner):'')+(x.c.shop_id?' · <span class="mono">'+esc(x.c.shop_id)+'</span>':'')+(fNom(x.c)?' · <b>'+fNom(x.c)+'</b>':'')+'</div></div><div class="right"><span class="chip '+x.s.cls+'">'+x.s.label+'</span><div class="d">fino al '+fdate(x.s.end)+'</div></div></button>').join('')
+    :'<div class="empty">'+(ROWS.length?C_().notFound:C_().empty)+'</div>';}
+
+// ===== Fogli =====
+function openSheet(title,html){$('sheetRoot').innerHTML='<div class="sheet-bg" data-act="closeBg"><div class="sheet" role="dialog" aria-label="'+esc(title)+'"><div class="sheet-head"><h2>'+esc(title)+'</h2><button class="btn sm line" data-act="close">Chiudi</button></div>'+html+'</div></div>';}
+function closeSheet(){$('sheetRoot').innerHTML='';payDraft=null;openId=null;}
+function baseDate(c){return maxIso(todayISO(),c.paid_until,c.trial_end);}
+
+function openClient(id){const c=cli(id);if(!c)return;const s=status(c);openId=id;
+  if(!payDraft||payDraft.id!==id){const fo=isF()?(FORMULE[c.formule]?c.formule:'premium'):'';payDraft={id,months:1,formule:fo,amount:String(isF()?FORMULE[fo].prix:(c.price||PREZZO_BASE)),mode:'Wave'};}
+  const pays=PAYS.filter(p=>p.user_id===id);
+  const tot=pays.reduce((a,p)=>a+(p.amount||0),0);
+  const newExp=addMonths(baseDate(c),payDraft.months);
+  const who=c.owner?' '+c.owner:'';const L=C_().label;const prM=isNav()?(c.price||FORMULE[c.formule].prix):isR()&&FORMULE[c.formule]?FORMULE[c.formule].prix:(c.price||PREZZO_BASE);
+  const remind=s.k==='bloccati'||s.k==='ritardo'
+    ?'Bonjour'+who+', votre abonnement '+L+' ('+nome(c)+') a expiré le '+fdate(s.end)+'. '+(s.k==='bloccati'?'L\'application est maintenant bloquée.':'Elle sera bloquée dans '+(GRACE_DAYS+s.left)+' jour(s).')+' Envoyez '+F(prM)+' par Wave ou Orange Money au '+TUO_WAVE+' et elle se débloque. Merci !'
+    :s.trial?'Bonjour'+who+', votre essai gratuit '+L+' se termine le '+fdate(s.end)+'. L\'abonnement coûte '+(isF()?'5 000 F (Essentiel), 10 000 F (Pro) ou 15 000 F (Premium)':F(c.price))+' par mois, par Wave ou Orange Money au '+TUO_WAVE+'. Merci !'
+    :'Bonjour'+who+', votre abonnement '+L+' ('+nome(c)+') se termine le '+fdate(s.end)+'. Pour continuer sans coupure, envoyez '+F(prM)+' par Wave ou Orange Money au '+TUO_WAVE+'. Merci !';
+  openSheet(nome(c),'<div class="card stack"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><span class="mono" style="font-size:20px">'+esc(c.shop_id||'—')+'</span><span class="chip '+s.cls+'">'+s.label+'</span></div>'+
+  '<div class="small">📞 '+esc(fphone(c.phone))+(c.owner?' · '+esc(c.owner):'')+(c.city?' · '+esc(c.city):'')+
+  '<br>Prova gratis fino al '+fdate(c.trial_end)+(c.paid_until?' · Pagato fino al <b>'+fdate(c.paid_until)+'</b>':'')+
+  '<br>'+(isF()?'Formula <b>'+fNom(c)+'</b> · ':'')+F(prM)+'/mese · Totale pagato: '+F(tot)+(c.notes?'<br>Note: '+esc(c.notes):'')+'</div>'+
+  '<div class="grid2"><a class="btn ghost" target="_blank" rel="noopener" href="'+waLink(c.phone,remind)+'">Sollecito WhatsApp</a><button class="btn line" data-act="edit" data-id="'+id+'">Modifica</button></div></div>'+
+  '<h3>Registra pagamento</h3><div class="card stack">'+(isF()?'<div class="small">Formula pagata</div><div class="months" style="grid-template-columns:repeat(3,1fr)">'+Object.entries(FORMULE).map(([k,f])=>'<button class="mbtn" data-act="form" data-f2="'+k+'" aria-pressed="'+(payDraft.formule===k)+'">'+f.nom+'<div class="small">'+F(f.prix)+'</div></button>').join('')+'</div>':'')+'<div class="months">'+[1,3,6,12].map(m=>'<button class="mbtn" data-act="mon" data-m="'+m+'" aria-pressed="'+(payDraft.months===m)+'">'+m+(m===1?' mese':' mesi')+'</button>').join('')+'</div>'+
+  '<div class="grid2"><label class="f">Importo ricevuto (F)<input id="pAmt" inputmode="numeric" value="'+esc(payDraft.amount)+'"></label><label class="f">Mezzo<select id="pMode">'+['Wave','Orange Money','Contanti'].map(m=>'<option'+(payDraft.mode===m?' selected':'')+'>'+m+'</option>').join('')+'</select></label></div>'+
+  '<div class="small">Nuova scadenza: <b>'+fdate(newExp)+'</b>'+(baseDate(c)>todayISO()?' (si aggiunge ai giorni che ha già)':' (parte da oggi)')+'</div>'+
+  '<button class="btn ok" data-act="pay" data-id="'+id+'">Registra pagamento</button></div>'+
+  '<div id="okZone"></div>'+
+  '<h3>Giorni regalo</h3><div class="card stack"><div class="grid2"><label class="f">Giorni<input id="gDays" inputmode="numeric" value="7"></label><div style="display:flex;align-items:flex-end"><button class="btn line" data-act="gift" data-id="'+id+'">Regala i giorni</button></div></div></div>'+
+  '<h3>Pagamenti</h3><div class="card">'+(pays.length?pays.map(p=>'<div class="hist"><div><b>'+F(p.amount)+'</b> · '+esc(p.mode)+(p.formule&&FORMULE[p.formule]?' · '+FORMULE[p.formule].nom:'')+'<div class="small">'+fdate(p.paid_on)+' · '+(p.months?p.months+' mese/i':p.days?p.days+' giorni':'')+' → fino al '+fdate(p.until)+'</div></div><span id="un'+p.id+'" style="align-self:center"><button class="btn sm line" data-act="askUndo" data-p="'+p.id+'">Annulla</button></span></div>').join(''):'<div class="small">Nessun pagamento ancora.</div>')+'</div>');}
+
+function formClient(c){openSheet('Modifica: '+nome(c),'<form id="fCli" class="stack card" data-id="'+c.user_id+'">'+
+  '<div class="small">Nome e telefono li sceglie il '+chi()+' nella sua app.</div>'+
+  '<div class="grid2"><label class="f">Proprietario<input id="cOwner" value="'+esc(c.owner)+'"></label><label class="f">Città<input id="cCity" value="'+esc(c.city)+'"></label></div>'+
+  (isF()?'<label class="f">Formula<select id="cForm">'+Object.entries(FORMULE).map(([k,f])=>'<option value="'+k+'"'+(c.formule===k?' selected':'')+'>'+f.nom+' · '+F(f.prix)+'</option>').join('')+'</select></label>':'')+
+  '<label class="f">Prezzo al mese (F)<input id="cPrice" inputmode="numeric" value="'+esc(c.price)+'"></label>'+
+  '<label class="f">Note<input id="cNotes" value="'+esc(c.notes)+'" placeholder="Es: paga sempre a fine mese"></label>'+
+  '<button class="btn" type="submit">Salva</button></form>');}
+
+function showOk(c,exp){const msg='Bonjour'+(c.owner?' '+c.owner:'')+', merci pour le paiement ! Votre abonnement '+C_().label+(isF()&&FORMULE[c.formule]?' ('+FORMULE[c.formule].nom+')':'')+' est actif jusqu\'au '+fdate(exp)+'.\n\n'+(isNav()?'Si l\'app est encore bloquée : touchez « J\'ai payé : vérifier ».':APP==='daara'?'Si l\'app est encore bloquée : ouvrez Plus › Abonnement et compte › « Vérifier mon abonnement ».':'Si l\'app est encore bloquée : ouvrez Plus › Réglages › « Vérifier mon abonnement ».');
+  const z=$('okZone');if(!z)return;z.innerHTML='<h3>Fatto ✅</h3><div class="card stack"><div class="codebox" style="font-size:22px">fino al '+fdate(exp)+'</div><div class="small" style="text-align:center">La sua app si sblocca da sola.</div><a class="btn ok" target="_blank" rel="noopener" href="'+waLink(c.phone,msg)+'">Manda la conferma su WhatsApp</a></div>';
+  z.scrollIntoView({behavior:'smooth',block:'start'});}
+
+function readPay(){if(!payDraft)return;const a=$('pAmt'),m=$('pMode');if(a)payDraft.amount=a.value;if(m)payDraft.mode=m.value;}
+async function rpcPay(id,months,days,amount,mode,btn,formule){if(btn){btn.disabled=true;btn.textContent='Attendi…';}
+  const r=isN()?await navRpc(APP+'_pan_pay',{p_user:id,p_months:months,p_days:days,p_amount:amount,p_mode:mode,p_formule:formule||''})
+        :isR()?await SB.rpc('resto_enregistrer_paiement',{p_user:id,p_months:months,p_days:days,p_amount:amount,p_mode:mode,p_formule:formule||''})
+              :await SB.rpc('enregistrer_paiement',{p_user:id,p_months:months,p_days:days,p_amount:amount,p_mode:mode});
+  if(r.error){if(btn){btn.disabled=false;btn.textContent='Riprova';}return toast(errMsg(r.error));}
+  const exp=r.data;payDraft=null;await loadAll();const c=cli(id);if(c){openClient(id);showOk(c,exp);}toast('Registrato');}
+
+// ===== Azioni =====
+document.addEventListener('click',async e=>{
+  const fb_=e.target.closest('[data-f]');if(fb_){filter=fb_.dataset.f;vMain();return;}
+  const el=e.target.closest('[data-act]');if(!el)return;const a=el.dataset.act;
+  if(a==='closeBg'){if(e.target===el)closeSheet();return;}
+  if(a==='close')return closeSheet();
+  if(a==='authMode'){AUTH=el.dataset.m;return vLogin();}
+  if(a==='reload')return loadAll();
+  if(a==='askOut'){$('outZone').innerHTML='<div class="notice stack" style="margin-bottom:10px"><span>Uscire? Per rientrare servono email e password.</span><div class="grid2"><button class="btn danger" data-act="logout">Sì, esci</button><button class="btn line" data-act="noOut">No</button></div></div>';return;}
+  if(a==='noOut'){$('outZone').innerHTML='';return;}
+  if(a==='logout'){try{await SB.auth.signOut();}catch(err){}USER=null;ROWS=[];PAYS=[];closeSheet();VIEW='login';AUTH='login';return render();}
+  if(a==='open')return openClient(el.dataset.id);
+  if(a==='edit')return formClient(cli(el.dataset.id));
+  if(a==='mon'){readPay();const c=cli(payDraft.id);payDraft.months=+el.dataset.m;payDraft.amount=String((isF()?FORMULE[payDraft.formule].prix:(c.price||0))*payDraft.months);openClient(c.user_id);return;}
+  if(a==='form'){readPay();const c=cli(payDraft.id);payDraft.formule=el.dataset.f2;payDraft.amount=String(FORMULE[payDraft.formule].prix*payDraft.months);openClient(c.user_id);return;}
+  if(a==='app'){APP=el.dataset.a;try{localStorage.setItem(AKEY,APP);}catch(err){}filter='tutti';q='';closeSheet();ROWS=[];PAYS=[];return loadAll();}
+  if(a==='pay'){readPay();const amt=Math.round(num(payDraft.amount));if(amt<=0)return toast('Scrivi l\'importo ricevuto');return rpcPay(el.dataset.id,payDraft.months,0,amt,payDraft.mode,el,payDraft.formule);}
+  if(a==='gift'){const d=Math.round(num($('gDays').value));if(d<=0||d>366)return toast('Numero di giorni non valido');return rpcPay(el.dataset.id,0,d,0,'Regalo '+d+' g',el);}
+  if(a==='askUndo'){$('un'+el.dataset.p).innerHTML='<button class="btn sm danger" data-act="undo" data-p="'+el.dataset.p+'">Sicuro?</button>';return;}
+  if(a==='undo'){el.disabled=true;const id=openId;const r=isN()?await navRpc(APP+'_pan_undo',{p_id:+el.dataset.p}):await SB.rpc(C_().undo,{p_id:+el.dataset.p});if(r.error){el.disabled=false;return toast(errMsg(r.error));}await loadAll();if(id)openClient(id);toast('Pagamento annullato');return;}
+  if(a==='navForget'){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(err){}return loadAll();}
+  if(a==='saveNum'){const n=$('myNum').value.trim(),wa=$('myWa').value.trim();if(n.replace(/\D/g,'').length<9)return toast('Numero non valido');TUO_WAVE=n;MY_WA=wa||n;try{localStorage.setItem(NKEY,JSON.stringify({wave:TUO_WAVE,wa:MY_WA}));}catch(err){}toast('Numero salvato');return;}
+  if(a==='cfgCopy')return copyText(JSON.stringify({whatsapp:waNum(MY_WA),paiement:TUO_WAVE,prix:PREZZO_BASE.toLocaleString('fr-FR').replace(/\s/g,' ')+' F',nom:TUO_NOME},null,1));
+});
+document.addEventListener('input',e=>{if(e.target.id==='q'){q=e.target.value;renderList();}});
+document.addEventListener('submit',async e=>{e.preventDefault();
+  if(e.target.id==='fAuth')return doAuth();
+  if(e.target.id==='fNav'){const v=$('navPw').value.trim();if(!v)return;NAVPW=v;try{localStorage.setItem(NPKEY,v);}catch(err){}return loadAll();}
+  if(e.target.id!=='fCli')return;
+  const id=e.target.dataset.id,g=k=>$(k).value.trim();
+  const r=isN()?await navRpc(APP+'_pan_edit',{p_user:id,p_formule:$('cForm')?$('cForm').value:'',p_price:Math.round(num(g('cPrice')))||null,p_owner:g('cOwner'),p_city:g('cCity'),p_notes:g('cNotes')})
+        :isR()?await SB.rpc('resto_modifier_client',{p_user:id,p_formule:$('cForm').value,p_price:Math.round(num(g('cPrice')))||10000,p_owner:g('cOwner'),p_city:g('cCity'),p_notes:g('cNotes')})
+              :await SB.rpc('modifier_client',{p_user:id,p_price:Math.round(num(g('cPrice')))||PREZZO_BASE,p_owner:g('cOwner'),p_city:g('cCity'),p_notes:g('cNotes')});
+  if(r.error)return toast(errMsg(r.error));payDraft=null;await loadAll();openClient(id);toast('Salvato');});
+boot();
+</script>
+
+</body></html>
