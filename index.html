@@ -83,7 +83,7 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .loading{padding:30px 14px;text-align:center;color:var(--muted)}
 .appsw{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:6px}
 .appsw .fbtn:nth-child(4),.appsw .fbtn:nth-child(5){grid-column:span 1}
-@media (min-width:520px){.appsw{grid-template-columns:repeat(5,minmax(0,1fr))}}
+@media (min-width:520px){.appsw{grid-template-columns:repeat(4,minmax(0,1fr))}}
 .appsw .fbtn{text-align:center;padding:10px 4px;font-size:14.5px}
 </style>
 <div id="app"><div class="loading">Caricamento…</div></div>
@@ -116,8 +116,12 @@ const CFG={
   daara:{label:'Daara & École',noun:'Daara / scuola',nouns:'Daara e scuole iscritte',none:'Daara senza nome',
     empty:'Ancora nessuna daara o scuola.<br>Quando una daara o una scuola crea il suo account nell\'app Daara & École, compare qui da sola.',notFound:'Nessuna daara o scuola trovata.'},
   loyer:{label:'Kër Loyer',noun:'Proprietario',nouns:'Proprietari iscritti',none:'Proprietario senza nome',
-    empty:'Ancora nessun proprietario.<br>Quando un proprietario crea il suo account nell\'app Kër Loyer, compare qui da solo.',notFound:'Nessun proprietario trovato.'}};
-const NEWAPPS=['boutique','resto','navette','daara','loyer'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
+    empty:'Ancora nessun proprietario.<br>Quando un proprietario crea il suo account nell\'app Kër Loyer, compare qui da solo.',notFound:'Nessun proprietario trovato.'},
+  couture:{label:'Atelier Couture',noun:'Atelier',nouns:'Atelier di sartoria iscritti',none:'Atelier senza nome',
+    empty:'Ancora nessun atelier.<br>Quando un sarto crea il suo account nell\'app Atelier Couture, compare qui da solo.',notFound:'Nessun atelier trovato.'},
+  salon:{label:'Salon Beauté',noun:'Salone',nouns:'Saloni iscritti',none:'Salone senza nome',
+    empty:'Ancora nessun salone.<br>Quando un salone crea il suo account nell\'app Salon Beauté, compare qui da solo.',notFound:'Nessun salone trovato.'}};
+const NEWAPPS=['boutique','resto','navette','daara','loyer','couture','salon'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
 const FORMULE={essentiel:{nom:'Essentiel',prix:5000},pro:{nom:'Pro',prix:10000},premium:{nom:'Premium',prix:15000}};
 let APP='boutique';try{const a=localStorage.getItem(AKEY);if(CFG[a])APP=a;}catch(e){}
 const C_=()=>CFG[APP];
@@ -125,7 +129,7 @@ const isR=()=>APP==='resto';
 const isN=()=>NEWAPPS.includes(APP);      // app del progetto nuovo seck.apps.sn
 const isNav=()=>APP==='navette';
 const isF=()=>APP==='resto'||APP==='navette';   // app con formule Essentiel/Pro/Premium
-const chi=()=>APP==='navette'?'trasportatore':APP==='daara'?'responsabile della daara/scuola':APP==='loyer'?'proprietario':isR()?'ristorante':'commerciante';
+const chi=()=>APP==='salon'?'salone':APP==='couture'?'sarto':APP==='navette'?'trasportatore':APP==='daara'?'responsabile della daara/scuola':APP==='loyer'?'proprietario':isR()?'ristorante':'commerciante';
 const fNom=c=>isF()&&FORMULE[c.formule]?FORMULE[c.formule].nom:'';
 let TUO_WAVE='77 879 00 06', MY_WA='77 879 00 06';
 try{const n=JSON.parse(localStorage.getItem(NKEY)||'null');if(n){TUO_WAVE=n.wave||TUO_WAVE;MY_WA=n.wa||TUO_WAVE;}}catch(e){}
@@ -188,7 +192,7 @@ async function loadNav(){
   if(!NAVPW){VIEW='navPw';return render();}
   const r=await navRpc(APP+'_pan_list');
   if(r.error){if(/password|sbagliata/i.test(r.error.message)){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(e){}window._navMsg='Password sbagliata, riprova.';VIEW='navPw';return render();}
-    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?(APP==='resto'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-resto.sql → Run.':APP==='boutique'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla carnet-boutique.sql → Run.':'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.'):errMsg(r.error);VIEW='netErr';return render();}
+    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?(APP==='resto'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-resto.sql → Run.':APP==='boutique'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla carnet-boutique.sql → Run.':APP==='couture'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla atelier-couture.sql → Run.':APP==='salon'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla salon-beaute.sql → Run.':'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.'):errMsg(r.error);VIEW='netErr';return render();}
   ROWS=r.data||[];
   const p=await navRpc(APP+'_pan_pays');PAYS=p.error?[]:(p.data||[]);
   VIEW='main';render();if(openId&&cli(openId))openClient(openId);}
@@ -223,7 +227,7 @@ async function doAuth(){const mail=$('auMail').value.trim().toLowerCase(),pw=$('
   catch(e){const m=String(e&&e.message||'');b.disabled=false;b.textContent=su?'Crea il mio account':'Entra';
     say(/already|registered|exists/i.test(m)?'Questo account esiste già: premi « Entra »':/invalid login|credentials/i.test(m)?'Email o password sbagliata':/not confirmed/i.test(m)?'Prima conferma l\'email (guarda nella tua casella di posta)':errMsg(e));}}
 
-function appSwitch(){return '<div class="appsw">'+[['boutique','🏪 Boutiques'],['resto','🍽️ Restos'],['navette','🚐 Navettes'],['daara','📖 Daaras'],['loyer','🏠 Loyers']].map(([k,l])=>'<button class="fbtn" data-act="app" data-a="'+k+'" aria-pressed="'+(APP===k)+'">'+l+'</button>').join('')+'</div>';}
+function appSwitch(){return '<div class="appsw">'+[['boutique','🏪 Boutiques'],['resto','🍽️ Restos'],['navette','🚐 Navettes'],['daara','📖 Daaras'],['loyer','🏠 Loyers'],['couture','✂️ Couture'],['salon','💇🏾‍♀️ Salons']].map(([k,l])=>'<button class="fbtn" data-act="app" data-a="'+k+'" aria-pressed="'+(APP===k)+'">'+l+'</button>').join('')+'</div>';}
 function vMain(){const t=todayISO(),mese=t.slice(0,7);
   const st=ROWS.map(c=>({c,s:status(c)}));
   const incMese=PAYS.filter(p=>String(p.paid_on).slice(0,7)===mese).reduce((s,p)=>s+(p.amount||0),0);
@@ -296,7 +300,7 @@ function formClient(c){openSheet('Modifica: '+nome(c),'<form id="fCli" class="st
   '<label class="f">Note<input id="cNotes" value="'+esc(c.notes)+'" placeholder="Es: paga sempre a fine mese"></label>'+
   '<button class="btn" type="submit">Salva</button></form>');}
 
-function showOk(c,exp){const msg='Bonjour'+(c.owner?' '+c.owner:'')+', merci pour le paiement ! Votre abonnement '+C_().label+(isF()&&FORMULE[c.formule]?' ('+FORMULE[c.formule].nom+')':'')+' est actif jusqu\'au '+fdate(exp)+'.\n\n'+(isNav()?'Si l\'app est encore bloquée : touchez « J\'ai payé : vérifier ».':APP==='daara'?'Si l\'app est encore bloquée : ouvrez Plus › Abonnement et compte › « Vérifier mon abonnement ».':'Si l\'app est encore bloquée : ouvrez Plus › Réglages › « Vérifier mon abonnement ».');
+function showOk(c,exp){const msg='Bonjour'+(c.owner?' '+c.owner:'')+', merci pour le paiement ! Votre abonnement '+C_().label+(isF()&&FORMULE[c.formule]?' ('+FORMULE[c.formule].nom+')':'')+' est actif jusqu\'au '+fdate(exp)+'.\n\n'+(isNav()?'Si l\'app est encore bloquée : touchez « J\'ai payé : vérifier ».':APP==='daara'?'Si l\'app est encore bloquée : ouvrez Plus › Abonnement et compte › « Vérifier mon abonnement ».':(APP==='couture'||APP==='salon')?'Si l\'app est encore bloquée : touchez « Abonnement » en haut, puis « J’ai payé : vérifier mon abonnement ».':'Si l\'app est encore bloquée : ouvrez Plus › Réglages › « Vérifier mon abonnement ».');
   const z=$('okZone');if(!z)return;z.innerHTML='<h3>Fatto ✅</h3><div class="card stack"><div class="codebox" style="font-size:22px">fino al '+fdate(exp)+'</div><div class="small" style="text-align:center">La sua app si sblocca da sola.</div><a class="btn ok" target="_blank" rel="noopener" href="'+waLink(c.phone,msg)+'">Manda la conferma su WhatsApp</a></div>';
   z.scrollIntoView({behavior:'smooth',block:'start'});}
 
