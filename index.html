@@ -288,7 +288,8 @@ function openClient(id){const c=cli(id);if(!c)return;const s=status(c);openId=id
   '<div class="small">📞 '+esc(fphone(c.phone))+(c.owner?' · '+esc(c.owner):'')+(c.city?' · '+esc(c.city):'')+
   '<br>Prova gratis fino al '+fdate(c.trial_end)+(c.paid_until?' · Pagato fino al <b>'+fdate(c.paid_until)+'</b>':'')+
   '<br>'+(isF()?'Formula <b>'+fNom(c)+'</b> · ':'')+F(prM)+'/mese · Totale pagato: '+F(tot)+(APP==='photo'&&ESP[c.user_id]?'<br>📸 '+ESP[c.user_id].nb+' foto · '+ESP[c.user_id].mo+' MB':'')+(c.notes?'<br>Note: '+esc(c.notes):'')+'</div>'+
-  '<div class="grid2"><a class="btn ghost" target="_blank" rel="noopener" href="'+waLink(c.phone,remind)+'">Sollecito WhatsApp</a><button class="btn line" data-act="edit" data-id="'+id+'">Modifica</button></div></div>'+
+  '<div class="grid2"><a class="btn ghost" target="_blank" rel="noopener" href="'+waLink(c.phone,remind)+'">Sollecito WhatsApp</a><button class="btn line" data-act="edit" data-id="'+id+'">Modifica</button></div>'+
+  '<div class="grid2"><button class="btn line" data-act="pwReset" data-id="'+id+'">🔑 Nuova password</button><button class="btn line" data-act="delAcc" data-id="'+id+'" style="color:#B42318">🗑️ Elimina account</button></div><div id="accZone"></div></div>'+
   '<h3>Registra pagamento</h3><div class="card stack">'+(isF()?'<div class="small">Formula pagata</div><div class="months" style="grid-template-columns:repeat(3,1fr)">'+Object.entries(FORMULE).map(([k,f])=>'<button class="mbtn" data-act="form" data-f2="'+k+'" aria-pressed="'+(payDraft.formule===k)+'">'+f.nom+'<div class="small">'+F(f.prix)+'</div></button>').join('')+'</div>':'')+'<div class="months">'+[1,3,6,12].map(m=>'<button class="mbtn" data-act="mon" data-m="'+m+'" aria-pressed="'+(payDraft.months===m)+'">'+m+(m===1?' mese':' mesi')+'</button>').join('')+'</div>'+
   '<div class="grid2"><label class="f">Importo ricevuto (F)<input id="pAmt" inputmode="numeric" value="'+esc(payDraft.amount)+'"></label><label class="f">Mezzo<select id="pMode">'+['Wave','Orange Money','Contanti'].map(m=>'<option'+(payDraft.mode===m?' selected':'')+'>'+m+'</option>').join('')+'</select></label></div>'+
   '<div class="small">Nuova scadenza: <b>'+fdate(newExp)+'</b>'+(baseDate(c)>todayISO()?' (si aggiunge ai giorni che ha già)':' (parte da oggi)')+'</div>'+
@@ -330,6 +331,17 @@ document.addEventListener('click',async e=>{
   if(a==='logout'){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(err){}ROWS=[];PAYS=[];closeSheet();VIEW='navPw';return render();}
   if(a==='open')return openClient(el.dataset.id);
   if(a==='edit')return formClient(cli(el.dataset.id));
+  if(a==='pwReset'){const c=cli(el.dataset.id);if(el.dataset.arm!=='1'){el.dataset.arm='1';el.textContent='Sicuro? Tocca ancora';return;}
+    const np=String(Math.floor(100000+Math.random()*900000));el.disabled=true;const r=await navRpc('seck_pan_reset_pw',{p_user:c.user_id,p_new:np});el.disabled=false;
+    if(r.error){el.dataset.arm='';el.textContent='🔑 Nuova password';return toast(/Could not find|does not exist|schema cache/i.test(r.error.message)?'Manca il passo su Supabase: incolla seck-comptes.sql → Run':errMsg(r.error));}
+    const msg='Bonjour'+(c.owner?' '+c.owner:'')+', voici votre nouveau mot de passe pour '+C_().label+' :\n\n'+np+'\n\nNuméro : '+fphone(c.phone)+'\nConnectez-vous avec ce mot de passe, puis changez-le dans Réglages › Compte. Merci !';
+    $('accZone').innerHTML='<div class="notice stack" style="margin-top:10px"><span>Nuova password per '+esc(nome(c))+':</span><div class="codebox" style="font-size:28px">'+np+'</div><a class="btn ok" target="_blank" rel="noopener" href="'+waLink(c.phone,msg)+'">Mandala su WhatsApp</a><span class="small">La vecchia password non funziona più.</span></div>';
+    el.dataset.arm='';el.textContent='🔑 Nuova password';return;}
+  if(a==='delAcc'){const c=cli(el.dataset.id);const st=+(el.dataset.arm||0);
+    if(st===0){el.dataset.arm='1';$('accZone').innerHTML='<div class="notice stack" style="margin-top:10px"><b>Eliminare l\'account di '+esc(nome(c))+'?</b><span class="small">Si cancellano per sempre i suoi dati, i suoi clienti e i suoi pagamenti. Non si può tornare indietro.</span><button class="btn danger" data-act="delAcc" data-id="'+el.dataset.id+'" data-arm="1">Sì, elimina per sempre</button></div>';return;}
+    el.disabled=true;el.textContent='Elimino…';const r=await navRpc('seck_pan_supprimer',{p_user:c.user_id});
+    if(r.error){el.disabled=false;el.textContent='Sì, elimina per sempre';return toast(/Could not find|does not exist|schema cache/i.test(r.error.message)?'Manca il passo su Supabase: incolla seck-comptes.sql → Run':errMsg(r.error));}
+    closeSheet();openId=null;await loadAll();return toast('Account eliminato');}
   if(a==='mon'){readPay();const c=cli(payDraft.id);payDraft.months=+el.dataset.m;payDraft.amount=String((isF()?FORMULE[payDraft.formule].prix:(c.price||0))*payDraft.months);openClient(c.user_id);return;}
   if(a==='form'){readPay();const c=cli(payDraft.id);payDraft.formule=el.dataset.f2;payDraft.amount=String(FORMULE[payDraft.formule].prix*payDraft.months);openClient(c.user_id);return;}
   if(a==='app'){APP=el.dataset.a;try{localStorage.setItem(AKEY,APP);}catch(err){}filter='tutti';q='';closeSheet();ROWS=[];PAYS=[];return loadAll();}
