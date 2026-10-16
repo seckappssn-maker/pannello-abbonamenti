@@ -124,8 +124,10 @@ const CFG={
   phone:{label:'Teranga Phone',noun:'Negozio',nouns:'Negozi di telefoni iscritti',none:'Negozio senza nome',
     empty:'Ancora nessun negozio.<br>Quando un riparatore o venditore di telefoni crea il suo account nell\'app Teranga Phone, compare qui da solo.',notFound:'Nessun negozio trovato.'},
   photo:{label:'Studio Photo',noun:'Fotografo',nouns:'Fotografi iscritti',none:'Studio senza nome',
-    empty:'Ancora nessun fotografo.<br>Quando un fotografo crea il suo account nell\'app Studio Photo, compare qui da solo.',notFound:'Nessun fotografo trovato.'}};
-const NEWAPPS=['boutique','resto','navette','daara','loyer','couture','salon','phone','photo'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
+    empty:'Ancora nessun fotografo.<br>Quando un fotografo crea il suo account nell\'app Studio Photo, compare qui da solo.',notFound:'Nessun fotografo trovato.'},
+  asso:{label:'Teranga Association',noun:'Associazione',nouns:'Associazioni iscritte',none:'Associazione senza nome',
+    empty:'Ancora nessuna associazione.<br>Quando un\'associazione crea il suo account nell\'app Teranga Association, compare qui da sola.',notFound:'Nessuna associazione trovata.'}};
+const NEWAPPS=['boutique','resto','navette','daara','loyer','couture','salon','phone','photo','asso'];   // queste stanno nel progetto Supabase nuovo "seck.apps.sn" (stessa password TN-)
 const FORMULE={essentiel:{nom:'Essentiel',prix:5000},pro:{nom:'Pro',prix:10000},premium:{nom:'Premium',prix:15000}};
 let APP='boutique';try{const a=localStorage.getItem(AKEY);if(CFG[a])APP=a;}catch(e){}
 const C_=()=>CFG[APP];
@@ -133,7 +135,7 @@ const isR=()=>APP==='resto';
 const isN=()=>NEWAPPS.includes(APP);      // app del progetto nuovo seck.apps.sn
 const isNav=()=>APP==='navette';
 const isF=()=>APP==='resto'||APP==='navette'||APP==='photo';   // app con formule Essentiel/Pro/Premium
-const chi=()=>APP==='photo'?'fotografo':APP==='phone'?'negozio di telefoni':APP==='salon'?'salone':APP==='couture'?'sarto':APP==='navette'?'trasportatore':APP==='daara'?'responsabile della daara/scuola':APP==='loyer'?'proprietario':isR()?'ristorante':'commerciante';
+const chi=()=>APP==='asso'?'responsabile dell\'associazione':APP==='photo'?'fotografo':APP==='phone'?'negozio di telefoni':APP==='salon'?'salone':APP==='couture'?'sarto':APP==='navette'?'trasportatore':APP==='daara'?'responsabile della daara/scuola':APP==='loyer'?'proprietario':isR()?'ristorante':'commerciante';
 const fNom=c=>isF()&&FORMULE[c.formule]?FORMULE[c.formule].nom:'';
 let TUO_WAVE='77 879 00 06', MY_WA='77 879 00 06';
 try{const n=JSON.parse(localStorage.getItem(NKEY)||'null');if(n){TUO_WAVE=n.wave||TUO_WAVE;MY_WA=n.wa||TUO_WAVE;}}catch(e){}
@@ -196,7 +198,7 @@ async function loadNav(){
   if(!NAVPW){VIEW='navPw';return render();}
   const r=await navRpc(APP+'_pan_list');
   if(r.error){if(/password|sbagliata/i.test(r.error.message)){NAVPW='';try{localStorage.removeItem(NPKEY);}catch(e){}window._navMsg='Password sbagliata, riprova.';VIEW='navPw';return render();}
-    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?(APP==='resto'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-resto.sql → Run.':APP==='boutique'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla carnet-boutique.sql → Run.':APP==='couture'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla atelier-couture.sql → Run.':APP==='salon'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla salon-beaute.sql → Run.':APP==='phone'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-phone.sql → Run.':APP==='photo'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla studio-photo.sql → Run.':'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.'):errMsg(r.error);VIEW='netErr';return render();}
+    window._lastErr=/Could not find|does not exist|schema cache/i.test(r.error.message)?(APP==='resto'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-resto.sql → Run.':APP==='boutique'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla carnet-boutique.sql → Run.':APP==='couture'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla atelier-couture.sql → Run.':APP==='salon'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla salon-beaute.sql → Run.':APP==='phone'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-phone.sql → Run.':APP==='photo'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla studio-photo.sql → Run.':APP==='asso'?'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla teranga-association.sql → Run.':'Manca il passo su Supabase (progetto seck.apps.sn): SQL Editor → incolla seck-apps-tout.sql → Run.'):errMsg(r.error);VIEW='netErr';return render();}
   ROWS=r.data||[];
   const p=await navRpc(APP+'_pan_pays');PAYS=p.error?[]:(p.data||[]);
   ESP={};if(APP==='photo'){const e=await navRpc('photo_pan_espace');(e.data||[]).forEach(x=>ESP[x.user_id]={nb:+x.nb||0,mo:Math.round((+x.octets||0)/1048576)});}
@@ -232,7 +234,7 @@ async function doAuth(){const mail=$('auMail').value.trim().toLowerCase(),pw=$('
   catch(e){const m=String(e&&e.message||'');b.disabled=false;b.textContent=su?'Crea il mio account':'Entra';
     say(/already|registered|exists/i.test(m)?'Questo account esiste già: premi « Entra »':/invalid login|credentials/i.test(m)?'Email o password sbagliata':/not confirmed/i.test(m)?'Prima conferma l\'email (guarda nella tua casella di posta)':errMsg(e));}}
 
-function appSwitch(){return '<div class="appsw">'+[['boutique','🏪 Boutiques'],['resto','🍽️ Restos'],['navette','🚐 Navettes'],['daara','📖 Daaras'],['loyer','🏠 Loyers'],['couture','✂️ Couture'],['salon','💇🏾‍♀️ Salons'],['phone','📱 Phones'],['photo','📸 Photo']].map(([k,l])=>'<button class="fbtn" data-act="app" data-a="'+k+'" aria-pressed="'+(APP===k)+'">'+l+'</button>').join('')+'</div>';}
+function appSwitch(){return '<div class="appsw">'+[['boutique','🏪 Boutiques'],['resto','🍽️ Restos'],['navette','🚐 Navettes'],['daara','📖 Daaras'],['loyer','🏠 Loyers'],['couture','✂️ Couture'],['salon','💇🏾‍♀️ Salons'],['phone','📱 Phones'],['photo','📸 Photo'],['asso','🤝 Associazioni']].map(([k,l])=>'<button class="fbtn" data-act="app" data-a="'+k+'" aria-pressed="'+(APP===k)+'">'+l+'</button>').join('')+'</div>';}
 function vMain(){const t=todayISO(),mese=t.slice(0,7);
   const st=ROWS.map(c=>({c,s:status(c)}));
   const incMese=PAYS.filter(p=>String(p.paid_on).slice(0,7)===mese).reduce((s,p)=>s+(p.amount||0),0);
@@ -306,7 +308,7 @@ function formClient(c){openSheet('Modifica: '+nome(c),'<form id="fCli" class="st
   '<label class="f">Note<input id="cNotes" value="'+esc(c.notes)+'" placeholder="Es: paga sempre a fine mese"></label>'+
   '<button class="btn" type="submit">Salva</button></form>');}
 
-function showOk(c,exp){const msg='Bonjour'+(c.owner?' '+c.owner:'')+', merci pour le paiement ! Votre abonnement '+C_().label+(isF()&&FORMULE[c.formule]?' ('+FORMULE[c.formule].nom+')':'')+' est actif jusqu\'au '+fdate(exp)+'.\n\n'+(isNav()?'Si l\'app est encore bloquée : touchez « J\'ai payé : vérifier ».':APP==='daara'?'Si l\'app est encore bloquée : ouvrez Plus › Abonnement et compte › « Vérifier mon abonnement ».':(APP==='couture'||APP==='salon'||APP==='phone'||APP==='photo')?'Si l\'app est encore bloquée : touchez « Abonnement » en haut, puis « J’ai payé : vérifier mon abonnement ».':'Si l\'app est encore bloquée : ouvrez Plus › Réglages › « Vérifier mon abonnement ».');
+function showOk(c,exp){const msg='Bonjour'+(c.owner?' '+c.owner:'')+', merci pour le paiement ! Votre abonnement '+C_().label+(isF()&&FORMULE[c.formule]?' ('+FORMULE[c.formule].nom+')':'')+' est actif jusqu\'au '+fdate(exp)+'.\n\n'+(isNav()?'Si l\'app est encore bloquée : touchez « J\'ai payé : vérifier ».':APP==='daara'?'Si l\'app est encore bloquée : ouvrez Plus › Abonnement et compte › « Vérifier mon abonnement ».':(APP==='couture'||APP==='salon'||APP==='phone'||APP==='photo'||APP==='asso')?'Si l\'app est encore bloquée : touchez « Abonnement » en haut, puis « J’ai payé : vérifier mon abonnement ».':'Si l\'app est encore bloquée : ouvrez Plus › Réglages › « Vérifier mon abonnement ».');
   const z=$('okZone');if(!z)return;z.innerHTML='<h3>Fatto ✅</h3><div class="card stack"><div class="codebox" style="font-size:22px">fino al '+fdate(exp)+'</div><div class="small" style="text-align:center">La sua app si sblocca da sola.</div><a class="btn ok" target="_blank" rel="noopener" href="'+waLink(c.phone,msg)+'">Manda la conferma su WhatsApp</a></div>';
   z.scrollIntoView({behavior:'smooth',block:'start'});}
 
