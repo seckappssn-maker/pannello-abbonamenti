@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<!doctype html><html><head><meta charset=utf8><link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="apple-touch-icon.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Pannello"><meta name="theme-color" content="#0B6E5B"><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#faf9f5;color:#141413}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <title>Abbonamenti Seck Tech</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&display=swap">
@@ -75,6 +75,10 @@ input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid v
 .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:calc(24px + env(safe-area-inset-bottom,0px));background:var(--ink);color:var(--bg);padding:10px 16px;border-radius:99px;font-weight:600;font-size:14px;z-index:40;max-width:90%}
 .notice{background:var(--warn-soft);color:var(--warn);border-radius:12px;padding:12px 14px;font-size:14px}
 @media (prefers-reduced-motion:no-preference){.sheet{animation:up .18s ease-out}@keyframes up{from{transform:translateY(30px);opacity:.6}}}
+.admcard{margin:18px 0 30px;padding:14px;border:1.5px solid #0B6E5B;border-radius:14px;background:#fff;display:flex;flex-direction:column;gap:8px}
+.admcard b{font-size:16px}.admnote{font-size:14px;opacity:.85;line-height:1.4}
+.admbtn{border:0;border-radius:12px;padding:12px 16px;font-weight:800;font-size:16px;background:#0B6E5B;color:#fff;cursor:pointer}
+.admbtn.ghost{background:transparent;color:#0B6E5B;border:1.5px solid #0B6E5B}
 </style>
 
 <style>
@@ -365,6 +369,34 @@ document.addEventListener('submit',async e=>{e.preventDefault();
         :isR()?await SB.rpc('resto_modifier_client',{p_user:id,p_formule:$('cForm').value,p_price:Math.round(num(g('cPrice')))||10000,p_owner:g('cOwner'),p_city:g('cCity'),p_notes:g('cNotes')})
               :await SB.rpc('modifier_client',{p_user:id,p_price:Math.round(num(g('cPrice')))||PREZZO_BASE,p_owner:g('cOwner'),p_city:g('cCity'),p_notes:g('cNotes')});
   if(r.error)return toast(errMsg(r.error));payDraft=null;await loadAll();openClient(id);toast('Salvato');});
+// ===== Avvisi sul telefono : nuove iscrizioni (tutte le app) e nuove attività =====
+const ADM_PUB='BLcHXOxXIRWkIBKizjrAQ0pRpNURUxUGiIlzYgHCGH-aAKLeiGsoL_thiuzOrPAUaF6lWhgOtBFTajqAcmO6sB8',ADM_KEY='pannelloSeck.push';
+const admIOS=()=>/iP(hone|ad|od)/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+const admHome=()=>!!(navigator.standalone||(window.matchMedia&&matchMedia('(display-mode: standalone)').matches));
+const admOk=()=>'serviceWorker' in navigator&&'PushManager' in window&&'Notification' in window;
+function admB64(s){s=String(s).replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const r=atob(s);return Uint8Array.from(r,c=>c.charCodeAt(0));}
+let ADM_BUSY=false;
+function admOnFlag(){try{return localStorage.getItem(ADM_KEY)==='1'&&admOk()&&Notification.permission==='granted';}catch(e){return false;}}
+function admCard(){let t;
+  if(admOnFlag())t='<b>🔔 Avvisi attivi su questo telefono</b><div class="admnote">Ti arriva un avviso a ogni nuova iscrizione (tutte le app) e quando un cliente aggiunge un\'attività.</div><button class="admbtn ghost" id="admTest" type="button">Manda un avviso di prova</button>';
+  else if(admIOS()&&!admHome())t='<b>🔔 Avvisi delle nuove iscrizioni</b><div class="admnote">Su iPhone: in Safari tocca <b>Condividi</b> (il quadrato con la freccia) → <b>Aggiungi alla schermata Home</b>. Poi apri il pannello da quella icona e torna qui.</div>';
+  else if(!admOk())t='<b>🔔 Avvisi delle nuove iscrizioni</b><div class="admnote">Questo browser non riceve avvisi. Usa Safari dalla schermata Home (iPhone) o Chrome (Android).</div>';
+  else t='<b>🔔 Avvisi delle nuove iscrizioni</b><div class="admnote">Ricevi un avviso su questo telefono quando qualcuno si iscrive a una delle tue app, anche con il pannello chiuso.</div><button class="admbtn" id="admOn" type="button"'+(ADM_BUSY?' disabled':'')+'>'+(ADM_BUSY?'Attendi…':'Attiva gli avvisi')+'</button>';
+  return '<div class="admcard" id="admCard">'+t+'</div>';}
+function admPaint(){const c=$('admCard');if(c)c.outerHTML=admCard();}
+async function admEnable(){if(ADM_BUSY)return;ADM_BUSY=true;admPaint();
+  try{const perm=await Notification.requestPermission();if(perm!=='granted'){toast('Notifiche rifiutate: attivale nelle Impostazioni del telefono');throw 0;}
+    const reg=await navigator.serviceWorker.register('sw.js');await navigator.serviceWorker.ready;
+    let s=await reg.pushManager.getSubscription();if(!s)s=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:admB64(ADM_PUB)});
+    const r=await navRpc('seck_admin_push_save',{p_sub:s.toJSON()});if(r.error)throw r.error;
+    try{localStorage.setItem(ADM_KEY,'1');}catch(e){}toast('Avvisi attivati ✅ Ti arriva un avviso di prova');navRpc('seck_admin_push_test');}
+  catch(e){if(e)toast('Non riesco ad attivare gli avvisi. Riprova.');}
+  ADM_BUSY=false;admPaint();}
+document.addEventListener('click',e=>{const b=e.target.closest('#admOn,#admTest');if(!b)return;
+  if(b.id==='admOn')admEnable();else navRpc('seck_admin_push_test').then(r=>toast(r.error?errMsg(r.error):'Avviso di prova inviato'));});
+{const _r=render;render=function(){const x=_r.apply(this,arguments);try{if(VIEW==='main'&&NAVPW&&!$('admCard')){const a=$('app'),w=a&&(a.querySelector('.wrap')||a);if(w)w.insertAdjacentHTML('beforeend',admCard());}}catch(e){}return x;};}
+// se gli avvisi erano attivi, rinnova l'iscrizione in silenzio (dopo aggiornamenti del telefono)
+setTimeout(async()=>{try{if(!admOnFlag()||!NAVPW)return;const reg=await navigator.serviceWorker.register('sw.js');const s=await reg.pushManager.getSubscription();if(s)navRpc('seck_admin_push_save',{p_sub:s.toJSON()});}catch(e){}},4000);
 boot();
 </script>
 
